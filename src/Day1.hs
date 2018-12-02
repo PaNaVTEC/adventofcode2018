@@ -10,8 +10,8 @@ import Control.Monad.State
 import qualified Data.List as L
 import Data.Maybe (fromMaybe)
 
-main :: IO ()
-main = do
+mainPart1 :: IO ()
+mainPart1 = do
   contents <- TIO.readFile "./input/day1.txt"
   print . frequencyChange . T.intercalate "," $ T.lines contents
 
@@ -36,8 +36,7 @@ reachesTwiceFirst input = go (0, M.empty)
       let (r, newState) = runState (calcState input) state
       in fromMaybe (go newState) r
 
---intermediaryFrequencies input index = scanl (+) 0 (L.take index (infiniteFreqs input))
---frequencyAt input freqIndex = intermediaryFrequencies input (freqIndex + 1) !! freqIndex
+frequencyAt :: T.Text -> Int -> Int
 frequencyAt input freqIndex = sum (L.take freqIndex (infiniteFreqs input))
 
 infiniteFreqs :: T.Text -> [Int]
