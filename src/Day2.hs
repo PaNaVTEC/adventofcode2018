@@ -17,9 +17,7 @@ mainPart1 = do
 countBoolsTuple :: [(Bool, Bool)] -> (Int, Int)
 countBoolsTuple = foldl sumBools (0, 0)
   where
-    sumBools (twos, threes) (a, b) = (twos + sumBool a, threes + sumBool b)
-    sumBool True = 1
-    sumBool False = 0
+    sumBools (twos, threes) (a, b) = (twos + boolToInt a, threes + boolToInt b)
 
 countRepeatedChars :: String -> (Bool, Bool)
 countRepeatedChars = toTuple . countRepetitions
@@ -40,10 +38,9 @@ mainPart2 = do
   print $ findBoxesThatDiffersByAChar $ lines contents
 
 findBoxesThatDiffersByAChar :: [String] -> Maybe String
-findBoxesThatDiffersByAChar listOfWords = listToMaybe . join $ foo2 <$> listOfWords
+findBoxesThatDiffersByAChar listOfWords = listToMaybe . join $ wordsDifferByCharAtPosition' <$> listOfWords
   where
-    foo2 :: String -> [String]
-    foo2 word = catMaybes $ wordsDifferByCharAtPosition word <$> L.delete word listOfWords
+    wordsDifferByCharAtPosition' word = catMaybes $ wordsDifferByCharAtPosition word <$> L.delete word listOfWords
 
 wordsDifferByCharAtPosition :: String -> String -> Maybe String
 wordsDifferByCharAtPosition word1 word2 = case foldl incIfNotEqual 0 (zip word1 word2) of
@@ -51,5 +48,7 @@ wordsDifferByCharAtPosition word1 word2 = case foldl incIfNotEqual 0 (zip word1 
   _ -> Nothing
   where
     incIfNotEqual b (c1, c2) = b + boolToInt (c1 /= c2)
-    boolToInt True = 1
-    boolToInt False = 0
+
+boolToInt :: Bool -> Int
+boolToInt True = 1
+boolToInt False = 0
