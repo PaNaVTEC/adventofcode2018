@@ -38,7 +38,7 @@ mainPart2 = do
   print $ findBoxesThatDiffersByAChar $ lines contents
 
 findBoxesThatDiffersByAChar :: [String] -> Maybe String
-findBoxesThatDiffersByAChar listOfWords = listToMaybe . join $ wordsDifferByCharAtPosition' <$> listOfWords
+findBoxesThatDiffersByAChar listOfWords = listToMaybe $ wordsDifferByCharAtPosition' =<< listOfWords
   where
     wordsDifferByCharAtPosition' word = catMaybes $ wordsDifferByCharAtPosition word <$> L.delete word listOfWords
 
