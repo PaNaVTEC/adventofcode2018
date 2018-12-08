@@ -4,7 +4,6 @@ import Text.Regex
 import Data.List (sortOn, partition, splitAt, findIndices, delete, maximumBy)
 import Data.Maybe (catMaybes)
 import qualified Data.Map as M
-import Debug.Trace
 import Data.Bifunctor
 
 mainPart1 :: IO ()
@@ -18,20 +17,17 @@ mostAsleepGuardInMinute lines =
       sleepyGuard = mostSleepyGuard shifts
       (Minute sleepyMinute) = mostSleepyMinute sleepyGuard shifts
   in sleepyGuard * sleepyMinute
---   trace
--- --  (show $ (filter shiftsForGuardId (groupByShift $ mkEventsTable lines)))
---   (show $ minutesSlept 10 $ (groupByShift $ mkEventsTable lines))
---   1
 
 mostSleepyMinute :: GuardId -> [Shift] -> Minute
-mostSleepyMinute guardId shifts = fst $ maximumBy foo . M.toList $ minutesSlept guardId shifts
+mostSleepyMinute guardId shifts = fst $ maximumBy foo . M.toList $ minutesSlept shifts guardId
   where
     foo a b = compare (snd a) (snd b)
 
-minutesSlept :: GuardId -> [Shift] -> M.Map Minute Int
-minutesSlept guardId shifts = foldl foo M.empty (filter shiftsForGuardId shifts)
+minutesSlept :: [Shift] -> GuardId -> M.Map Minute Int
+minutesSlept shifts guardId = foldl foo M.empty (filter shiftsForGuardId shifts)
   where
     shiftsForGuardId (Shift guardId' _) = guardId == guardId'
+    foo m shift@(Shift guardId []) = M.empty
     foo m shift@(Shift guardId events) =
       fst (foldl foo2 (m, head events) (tail events))
 
@@ -94,6 +90,30 @@ dateRegex = mkRegex "\\[([[:digit:]]{4})-([[:digit:]]{2})-([[:digit:]]{2})\\s([[
 
 eventRegex :: Regex
 eventRegex = mkRegex "(Guard #([[:digit:]]+) begins shift|falls asleep|wakes up)"
+
+mainPart2 :: IO ()
+mainPart2 = do
+  contents <- readFile "./input/day4.txt"
+  print $ guardSleptInTheSameMinuteMost . lines $ contents
+
+guardSleptInTheSameMinuteMost lines =
+    let shifts = groupByShift . mkEventsTable $ lines
+        guardIds = getGuardId <$> shifts
+        minsSleptByGuard = minMostSleepByGuard $ (\gId -> (gId, minutesSlept shifts gId)) <$> guardIds
+        (gId, Minute min, _) = maximumBy asleep minsSleptByGuard
+
+    in gId * min
+  where
+    getGuardId (Shift guardId _) = guardId
+    asleep (_, _, m) (_,_,m') = compare m m'
+
+minMostSleepByGuard :: [(GuardId, M.Map Minute Int)] -> [(GuardId, Minute, Int)]
+minMostSleepByGuard dat = toTuple <$> filter noEmptyMaps dat
+  where
+    noEmptyMaps (_, m) = not . M.null $ m
+    toTuple (id, d) = uncurry (\a b -> (id, a, b)) (ff d)
+    ff m = maximumBy comparem (M.toList m)
+    comparem (_, i) (_, i') = compare i i'
 
 splitByIndices :: [a] -> [Int] -> [[a]]
 splitByIndices xs is = go xs (zipWith subtract (0:is) is)
