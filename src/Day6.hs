@@ -102,13 +102,13 @@ data BoardBounds = BoardBounds { width :: Int, height :: Int } deriving (Eq, Sho
 mainPart2 :: IO ()
 mainPart2 = do
   contents <- readFile "./input/day6.txt"
-  print $ safeRegionSize . lines $ contents
+  print $ safeRegionSize 10000 . lines $ contents
 
-safeRegionSize :: [String] -> Int
-safeRegionSize lines' =
+safeRegionSize :: Int -> [String] -> Int
+safeRegionSize limit lines' =
   let coords = parseCoordinates lines'
       grid = mkGrid' coords
-  in length . filter (<10000) $ grid
+  in length . filter (<limit) $ grid
 
 mkGrid' :: [Coordinate] -> [Int]
 mkGrid' coords = let boardBounds = calcBoardBounds coords

@@ -40,3 +40,12 @@ spec = describe "Areas" $ do
       Just (b,3),Just (b,2),Just (b,3),Nothing,Just (e,4),Just (e,3),Just (f,3),Just (f,2),Just (f,1),Just (f,2),
       Just (b,4),Just (b,3),Just (b,4),Nothing,Just (f,4),Just (f,3),Just (f,2),Just (f,1),Just (f,0),Just (f,1)
     ]
+
+  it "calcualtes length of the safest area" $
+    safeRegionSize 32 [
+      "1, 1",
+      "1, 6",
+      "8, 3",
+      "3, 4",
+      "5, 5",
+      "8, 9"] `shouldBe` 16
