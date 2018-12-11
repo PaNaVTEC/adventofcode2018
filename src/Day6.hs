@@ -98,3 +98,24 @@ type ClosestArea = Coordinate
 type Distance = Int
 type Point = (ClosestArea, Distance)
 data BoardBounds = BoardBounds { width :: Int, height :: Int } deriving (Eq, Show)
+
+mainPart2 :: IO ()
+mainPart2 = do
+  contents <- readFile "./input/day6.txt"
+  print $ safeRegionSize . lines $ contents
+
+safeRegionSize :: [String] -> Int
+safeRegionSize lines' =
+  let coords = parseCoordinates lines'
+      grid = mkGrid' coords
+  in length . filter (<10000) $ grid
+
+mkGrid' :: [Coordinate] -> [Int]
+mkGrid' coords = let boardBounds = calcBoardBounds coords
+                 in sumAllAreasDistance boardBounds <$> [0..(width boardBounds * height boardBounds - 1)]
+  where
+    sumAllAreasDistance :: BoardBounds -> Int -> Int
+    sumAllAreasDistance boardBounds fixedPos =
+      let coord = fromFixedPos fixedPos boardBounds
+          distances = snd . (\i -> (i, manhattanDistance coord i)) <$> coords
+      in sum distances
